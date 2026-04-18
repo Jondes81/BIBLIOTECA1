@@ -178,7 +178,7 @@
         const SUPABASE_URL = 'https://rotpcchkqqaxrgewrpoy.supabase.co'; // Ex: https://xyz.supabase.co
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdHBjY2hrcXFheHJnZXdycG95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDk5MzQsImV4cCI6MjA5MDk4NTkzNH0.Z5n-47ZPWCHD0G4WZAW8YNUh0fIVRD5JuBhsmxkXdJ8'; // O token longo anon/public
         
-        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let dadosLivroAtual = null;
         let streamCamera = null;
@@ -196,9 +196,8 @@
         // --- SISTEMA DE VISUALIZAÇÃO (GRADE VS LISTA) ---
         function mudarVisualizacao(modo) {
             modoExibicao = modo;
-            localStorage.setItem('modoExibicaoLivros', modo); // Salva na memória do navegador
+            localStorage.setItem('modoExibicaoLivros', modo);
 
-            // Estiliza os botões do menu
             const btnGrade = document.getElementById('btnGrade');
             const btnLista = document.getElementById('btnLista');
 
@@ -210,7 +209,6 @@
                 btnGrade.className = "w-10 h-10 rounded-lg flex items-center justify-center transition-colors text-slate-400 hover:bg-slate-100";
             }
 
-            // Recarrega os livros com o novo formato
             carregarLivros(document.getElementById('pesquisa').value);
         }
 
@@ -226,16 +224,16 @@
             container.innerHTML = ''; 
 
             if(livros.length === 0) {
-                container.className = "flex-1 p-6 flex items-center justify-center";
+                container.className = "flex-1 p-6 overflow-y-auto flex items-center justify-center";
                 container.innerHTML = `<div class="flex flex-col items-center justify-center text-slate-400"><i class="fa-solid fa-book-open-reader text-6xl mb-4 opacity-50"></i><p>Nenhum livro encontrado.</p></div>`;
                 return;
             }
 
-            // Define o grid/flex CSS do container pai baseado no modo
+            // CORREÇÃO: Mantém as classes "flex-1 p-6 overflow-y-auto" em ambos os modos para garantir o Scroll!
             if (modoExibicao === 'grade') {
-                container.className = "grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5 content-start";
+                container.className = "flex-1 p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5 content-start";
             } else {
-                container.className = "flex flex-col gap-3 content-start";
+                container.className = "flex-1 p-6 overflow-y-auto flex flex-col gap-3 content-start";
             }
 
             livros.forEach(livro => {
@@ -247,7 +245,6 @@
                 const card = document.createElement('div');
                 card.onclick = () => abrirDetalhes(livro);
 
-                // RENDERIZAR CARD (GRADE)
                 if (modoExibicao === 'grade') {
                     const imgTag = livro.capa 
                         ? `<img src="${imgSrc}" class="w-16 h-24 object-cover rounded shadow-sm border border-slate-200 shrink-0">` 
@@ -268,9 +265,7 @@
                             </div>
                         </div>
                     `;
-                } 
-                // RENDERIZAR LINHA (LISTA HORIZONTAL)
-                else {
+                } else {
                     const imgTag = livro.capa 
                         ? `<img src="${imgSrc}" class="w-10 h-10 object-cover rounded-full shadow-sm border border-slate-200 shrink-0">` 
                         : `<div class="w-10 h-10 bg-slate-100 border border-slate-200 rounded-full shadow-sm flex items-center justify-center text-[10px] text-slate-400 shrink-0"><i class="fa-solid fa-image"></i></div>`;
@@ -291,12 +286,11 @@
                         </div>
                     `;
                 }
-
                 container.appendChild(card);
             });
         }
 
-        // ================= (Restante das funções permanece igual) =================
+        // ================= (RESTANTE DO CÓDIGO) =================
         function abrirScanner() {
             document.getElementById('modalScanner').classList.add('active');
             leitorCodigoBarras = new Html5QrcodeScanner("reader", { fps: 15, qrbox: {width: 300, height: 100}, videoConstraints: { facingMode: "environment", advanced: [{ focusMode: "continuous" }] } }, false);
@@ -356,6 +350,7 @@
         async function capturarFoto() { const v = document.getElementById('videoCamera'), c = document.getElementById('canvasCamera'), ctx = c.getContext('2d'); c.width = 300; c.height = 400; const m = Math.min(v.videoWidth, v.videoHeight); ctx.drawImage(v, (v.videoWidth - m)/2, (v.videoHeight - m)/2, m, m, 0, 0, c.width, c.height); await salvarNovaCapa(c.toDataURL('image/jpeg', 0.8).split(',')[1]); fecharCameraCapa(); }
         function fecharCameraCapa() { if (streamCamera) { streamCamera.getTracks().forEach(t => t.stop()); streamCamera = null; } fecharModal('modalCameraCapa'); document.getElementById('modalDetalhes').classList.add('active'); }
         async function salvarNovaCapa(b64) { const { error } = await db.from('livros').update({ capa: b64 }).eq('id', dadosLivroAtual.id); if (error) alert("Erro ao salvar foto"); else { dadosLivroAtual.capa = b64; atualizarCapaVisual(b64); carregarLivros(document.getElementById('pesquisa').value); } }
+        
     </script>
 </body>
 </html>
