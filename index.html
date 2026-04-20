@@ -14,189 +14,191 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        /* Ajuste para telas mobile: evita que o h-screen quebre em alguns browsers */
         .h-dynamic { height: 100vh; height: 100dvh; }
 
-        .modal { display: none; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+        /* Estilo da Gaveta de Cadastro no Mobile */
+        @media (max-width: 767px) {
+            #sidebar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: auto;
+                max-height: 90vh;
+                transform: translateY(100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border-radius: 24px 24px 0 0;
+                z-index: 100;
+            }
+            #sidebar.open { transform: translateY(0); }
+            #overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px); z-index: 90; }
+            #overlay.active { display: block; }
+        }
+
+        .modal { display: none; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 110; }
         .modal.active { display: flex; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
         .input-padrao {
-            width: 100%; border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; border-radius: 0.5rem; 
-            outline: none; transition: all 0.2s; background-color: #f8fafc; font-size: 16px; /* Evita zoom no iOS */
+            width: 100%; border: 1px solid #e2e8f0; padding: 0.6rem 0.75rem; border-radius: 0.75rem; 
+            outline: none; transition: all 0.2s; background-color: #f8fafc; font-size: 16px;
         }
         .input-padrao:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); background-color: #ffffff; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans h-dynamic flex flex-col md:flex-row overflow-hidden">
 
-    <aside class="w-full md:w-80 lg:w-96 bg-white shadow-lg flex flex-col h-[40vh] md:h-full overflow-y-auto border-r border-slate-200 z-10 shrink-0">
-        <div class="p-4 md:p-6 border-b border-slate-100 bg-white sticky top-0 z-20">
-            <h2 class="text-lg md:text-xl font-extrabold text-blue-600 flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center"><i class="fa-solid fa-book-open"></i></div>
-                Gestão
+    <div id="overlay" onclick="toggleCadastro()"></div>
+
+    <aside id="sidebar" class="w-full md:w-80 lg:w-96 bg-white shadow-2xl md:shadow-lg flex flex-col h-full overflow-y-auto border-r border-slate-200 shrink-0">
+        <div class="p-4 md:p-6 border-b border-slate-100 bg-white sticky top-0 z-20 flex justify-between items-center">
+            <h2 class="text-lg font-extrabold text-blue-600 flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center"><i class="fa-solid fa-plus"></i></div>
+                Novo Livro
             </h2>
+            <button onclick="toggleCadastro()" class="md:hidden text-slate-400 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
         
-        <form id="formLivro" class="flex flex-col gap-4 p-4 md:p-6">
+        <form id="formLivro" class="flex flex-col gap-4 p-5 md:p-6 pb-10">
             <input type="hidden" id="livroId">
             <input type="hidden" id="capaBase64">
 
-            <div class="bg-slate-50 p-3 md:p-4 rounded-xl border border-slate-200">
-                <label class="font-bold text-[10px] text-slate-600 uppercase tracking-wider mb-2 block">Código de Barras *</label>
+            <div>
+                <label class="font-bold text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 block">Identificação</label>
                 <div class="flex gap-2">
-                    <input type="text" id="codigo" class="input-padrao flex-1" placeholder="Código" required>
-                    <button type="button" onclick="abrirScanner()" class="bg-blue-600 text-white w-10 h-10 rounded-lg flex items-center justify-center shrink-0"><i class="fa-solid fa-barcode"></i></button>
+                    <input type="text" id="codigo" class="input-padrao flex-1" placeholder="Código de barras" required>
+                    <button type="button" onclick="abrirScanner()" class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md active:scale-95 transition-transform"><i class="fa-solid fa-barcode"></i></button>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 gap-4">
-                <div><label class="font-bold text-[10px] text-slate-600 uppercase tracking-wider mb-1 block">Título *</label><input type="text" id="titulo" class="input-padrao" required></div>
-                <div><label class="font-bold text-[10px] text-slate-600 uppercase tracking-wider mb-1 block">Autor *</label><input type="text" id="autor" class="input-padrao" required></div>
+                <div><label class="font-bold text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 block">Título da Obra</label><input type="text" id="titulo" class="input-padrao" placeholder="Ex: Dom Casmurro" required></div>
+                <div><label class="font-bold text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 block">Autor</label><input type="text" id="autor" class="input-padrao" placeholder="Ex: Machado de Assis" required></div>
             </div>
             
             <div class="grid grid-cols-2 gap-4">
-                <div><label class="font-bold text-[10px] text-slate-600 uppercase tracking-wider mb-1 block">Qtd *</label><input type="number" id="quantidade" class="input-padrao" required></div>
-                <div><label class="font-bold text-[10px] text-slate-600 uppercase tracking-wider mb-1 block">Gênero</label><input type="text" id="genero" class="input-padrao"></div>
+                <div><label class="font-bold text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 block">Quantidade</label><input type="number" id="quantidade" class="input-padrao" value="1" required></div>
+                <div><label class="font-bold text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 block">Gênero</label><input type="text" id="genero" class="input-padrao" placeholder="Ex: Romance"></div>
             </div>
 
-            <button type="submit" id="btnSalvar" class="bg-emerald-600 text-white font-bold py-3 rounded-lg shadow hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 mt-2">
-                <i class="fa-solid fa-floppy-disk"></i> Salvar
+            <button type="submit" id="btnSalvar" class="bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-emerald-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-2">
+                <i class="fa-solid fa-check"></i> Finalizar Cadastro
             </button>
-            <button type="button" onclick="limparFormulario()" class="text-xs text-slate-400 hover:text-slate-600 transition-colors">Limpar campos</button>
+            <button type="button" onclick="limparFormulario()" class="text-xs text-slate-400 hover:text-slate-600 py-2">Limpar dados</button>
         </form>
     </aside>
 
-    <main class="flex-1 flex flex-col min-h-0 bg-slate-50">
-        <div class="p-4 md:p-6 pb-2 border-b border-slate-200 bg-white md:bg-transparent">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <h1 class="text-xl font-bold text-slate-800">📚 Acervo</h1>
-                <div class="flex items-center gap-2 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
-                    <button id="btnGrade" onclick="mudarVisualizacao('grade')" class="p-2 rounded-md transition-colors"><i class="fa-solid fa-table-cells-large"></i></button>
-                    <button id="btnLista" onclick="mudarVisualizacao('lista')" class="p-2 rounded-md transition-colors"><i class="fa-solid fa-list"></i></button>
+    <main class="flex-1 flex flex-col min-h-0 relative">
+        <div class="p-4 md:p-6 pb-2 border-b border-slate-200 bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-xl font-black text-slate-800 tracking-tight">MEU ACERVO</h1>
+                <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
+                    <button id="btnGrade" onclick="mudarVisualizacao('grade')" class="w-10 h-10 rounded-lg flex items-center justify-center transition-all"><i class="fa-solid fa-grip"></i></button>
+                    <button id="btnLista" onclick="mudarVisualizacao('lista')" class="w-10 h-10 rounded-lg flex items-center justify-center transition-all"><i class="fa-solid fa-list-ul"></i></button>
                 </div>
             </div>
-            <div class="relative mt-4">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i></div>
-                <input type="text" id="pesquisa" placeholder="Pesquisar..." class="block w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 shadow-sm">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="pesquisa" placeholder="Pesquisar por título, autor ou código..." class="w-full pl-12 pr-4 py-3 bg-slate-100 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
         </div>
 
-        <div id="containerLivros" class="flex-1 overflow-y-auto p-4 md:p-6">
+        <div id="containerLivros" class="flex-1 overflow-y-auto p-4 md:p-6 pb-24">
             </div>
+
+        <button onclick="toggleCadastro()" class="md:hidden fixed bottom-6 right-6 w-16 h-16 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl z-[80] active:scale-90 transition-transform">
+            <i class="fa-solid fa-plus"></i>
+        </button>
     </main>
 
-    <div id="modalScanner" class="modal fixed inset-0 items-center justify-center z-[60] p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
-            <div class="w-full flex justify-between items-center mb-4">
-                <h3 class="font-bold text-slate-800">📷 Escanear</h3>
-                <button onclick="fecharScanner()" class="text-slate-400 hover:text-red-500 text-xl">&times;</button>
+    <div id="modalScanner" class="modal fixed inset-0 items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold">Escanear Código</h3>
+                <button onclick="fecharScanner()" class="text-2xl">&times;</button>
             </div>
-            <div id="reader" class="w-full bg-slate-100 rounded-lg overflow-hidden border border-slate-200"></div>
+            <div id="reader" class="rounded-2xl overflow-hidden border"></div>
         </div>
     </div>
 
-    <div id="modalDetalhes" class="modal fixed inset-0 items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-slate-800">Ficha Técnica</h3>
-                <button onclick="fecharModal('modalDetalhes')" class="text-slate-400 text-2xl">&times;</button>
-            </div>
-            <div id="detalhesContent" class="p-4 md:p-6 overflow-y-auto">
-                <div class="flex flex-col sm:flex-row gap-6">
-                    <div class="flex flex-col items-center shrink-0">
-                        <div class="w-32 h-44 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden mb-3">
-                            <img id="detCapa" src="" class="hidden w-full h-full object-cover">
-                            <div id="detCapaTexto" class="text-[10px] text-slate-400 font-bold text-center">SEM CAPA</div>
-                        </div>
-                        <div class="flex gap-1 w-full">
-                            <label class="flex-1 bg-slate-100 text-[10px] font-bold p-2 rounded text-center cursor-pointer">
-                                <i class="fa-solid fa-upload"></i>
-                                <input type="file" accept="image/*" class="hidden" onchange="alterarCapaArquivo(event)">
-                            </label>
-                            <button onclick="abrirCameraCapa()" class="flex-1 bg-blue-50 text-blue-600 text-[10px] font-bold p-2 rounded"><i class="fa-solid fa-camera"></i></button>
-                        </div>
+    <div id="modalDetalhes" class="modal fixed inset-0 items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div id="detalhesContent" class="p-6">
+                <div class="flex gap-4 mb-6">
+                    <div class="w-24 h-32 bg-slate-100 rounded-xl overflow-hidden shrink-0 border">
+                        <img id="detCapa" class="w-full h-full object-cover hidden">
+                        <div id="detCapaTexto" class="h-full flex items-center justify-center text-[10px] text-center p-2 font-bold text-slate-400">SEM FOTO</div>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <h4 id="detTitulo" class="text-lg font-bold text-slate-900 truncate"></h4>
-                        <p id="detAutor" class="text-blue-600 text-sm mb-4"></p>
-                        <div class="grid grid-cols-2 gap-2 text-sm">
-                            <div class="bg-slate-50 p-2 rounded"><span class="text-[9px] text-slate-400 block">ESTOQUE</span><span id="detQtd" class="font-bold"></span></div>
-                            <div class="bg-slate-50 p-2 rounded"><span class="text-[9px] text-slate-400 block">GÊNERO</span><span id="detGenero" class="font-bold"></span></div>
-                            <div class="bg-slate-50 p-2 rounded col-span-2"><span class="text-[9px] text-slate-400 block">CÓDIGO</span><span id="detCodigo" class="font-mono text-xs"></span></div>
-                        </div>
+                    <div class="min-w-0 flex flex-col justify-center">
+                        <h4 id="detTitulo" class="font-black text-lg leading-tight mb-1 truncate"></h4>
+                        <p id="detAutor" class="text-blue-600 font-medium text-sm"></p>
                     </div>
-                 </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-slate-50 p-3 rounded-2xl"><span class="text-[10px] text-slate-400 block font-bold uppercase">Estoque</span><span id="detQtd" class="text-lg font-black"></span></div>
+                    <div class="bg-slate-50 p-3 rounded-2xl"><span class="text-[10px] text-slate-400 block font-bold uppercase">Gênero</span><span id="detGenero" class="text-sm font-bold truncate"></span></div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="prepararEdicao()" class="flex-1 bg-amber-500 text-white py-3 rounded-xl font-bold">Editar</button>
+                    <button onclick="excluirLivroAtual()" class="flex-1 bg-red-100 text-red-600 py-3 rounded-xl font-bold">Excluir</button>
+                </div>
             </div>
-            <div class="p-4 border-t bg-slate-50 flex gap-2">
-                <button onclick="prepararEdicao()" class="flex-1 bg-amber-500 text-white py-2 rounded-lg font-bold text-sm">Editar</button>
-                <button onclick="excluirLivroAtual()" class="flex-1 bg-red-100 text-red-600 py-2 rounded-lg font-bold text-sm">Excluir</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalCameraCapa" class="modal fixed inset-0 items-center justify-center z-[70] p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-4 flex flex-col items-center w-full max-w-xs">
-            <div class="rounded-lg overflow-hidden bg-black mb-4 w-full aspect-[3/4]">
-                <video id="videoCamera" class="w-full h-full object-cover" autoplay playsinline></video>
-            </div>
-            <canvas id="canvasCamera" class="hidden"></canvas>
-            <div class="flex gap-2 w-full">
-                <button onclick="capturarFoto()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-lg">Capturar</button>
-                <button onclick="fecharCameraCapa()" class="flex-1 bg-slate-200 text-slate-700 py-3 rounded-lg">Sair</button>
-            </div>
+            <button onclick="fecharModal('modalDetalhes')" class="w-full py-4 text-slate-400 text-xs font-bold uppercase tracking-widest border-t">Fechar</button>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÕES SUPABASE
+        // --- CONFIGURAÇÃO SUPABASE ---
         const SUPABASE_URL = 'https://rotpcchkqqaxrgewrpoy.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdHBjY2hrcXFheHJnZXdycG95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDk5MzQsImV4cCI6MjA5MDk4NTkzNH0.Z5n-47ZPWCHD0G4WZAW8YNUh0fIVRD5JuBhsmxkXdJ8';
-        
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let dadosLivroAtual = null;
-        let streamCamera = null;
         let leitorCodigoBarras = null;
         let modoExibicao = localStorage.getItem('modoExibicaoLivros') || 'grade'; 
 
-        document.addEventListener('DOMContentLoaded', () => {
-            mudarVisualizacao(modoExibicao);
-            document.getElementById('pesquisa').addEventListener('input', (e) => carregarLivros(e.target.value));
-            document.getElementById('formLivro').addEventListener('submit', salvarLivro);
-        });
+        // --- CONTROLE DE UI ---
+        function toggleCadastro() {
+            const side = document.getElementById('sidebar');
+            const over = document.getElementById('overlay');
+            side.classList.toggle('open');
+            over.classList.toggle('active');
+        }
+
+        function fecharCadastroNoMobile() {
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('overlay').classList.remove('active');
+            }
+        }
 
         function mudarVisualizacao(modo) {
             modoExibicao = modo;
             localStorage.setItem('modoExibicaoLivros', modo);
-            const btnG = document.getElementById('btnGrade');
-            const btnL = document.getElementById('btnLista');
-            
-            const activeClass = "bg-blue-100 text-blue-600 shadow-sm";
-            const inactiveClass = "text-slate-400 hover:bg-slate-100";
-            
-            btnG.className = `p-2 rounded-md transition-colors ${modo === 'grade' ? activeClass : inactiveClass}`;
-            btnL.className = `p-2 rounded-md transition-colors ${modo === 'lista' ? activeClass : inactiveClass}`;
-
+            const active = "bg-white text-blue-600 shadow-sm";
+            const inactive = "text-slate-400";
+            document.getElementById('btnGrade').className = `w-10 h-10 rounded-lg flex items-center justify-center transition-all ${modo === 'grade' ? active : inactive}`;
+            document.getElementById('btnLista').className = `w-10 h-10 rounded-lg flex items-center justify-center transition-all ${modo === 'lista' ? active : inactive}`;
             carregarLivros(document.getElementById('pesquisa').value);
         }
 
+        // --- LÓGICA DE DADOS ---
         async function carregarLivros(termo = "") {
-            let query = db.from('livros').select('*');
-            if (termo) query = query.or(`titulo.ilike.%${termo}%,autor.ilike.%${termo}%,genero.ilike.%${termo}%,codigo_barra.ilike.%${termo}%`);
-
-            const { data: livros, error } = await query;
+            let query = db.from('livros').select('*').order('created_at', { ascending: false });
+            if (termo) query = query.or(`titulo.ilike.%${termo}%,autor.ilike.%${termo}%,codigo_barra.ilike.%${termo}%`);
+            
+            const { data: livros } = await query;
             const container = document.getElementById('containerLivros');
             container.innerHTML = ''; 
 
             if (!livros || livros.length === 0) {
-                container.innerHTML = `<div class="h-full flex items-center justify-center text-slate-400 text-sm">Nenhum livro encontrado.</div>`;
+                container.innerHTML = `<div class="mt-20 text-center text-slate-300"><i class="fa-solid fa-book-open text-4xl mb-2"></i><p>Nenhum livro aqui.</p></div>`;
                 return;
             }
 
             container.className = modoExibicao === 'grade' 
-                ? "flex-1 overflow-y-auto p-4 md:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 content-start"
-                : "flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-2 content-start";
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                : "flex flex-col gap-3";
 
             livros.forEach(livro => {
                 const card = document.createElement('div');
@@ -204,42 +206,36 @@
                 const imgSrc = livro.capa ? `data:image/png;base64,${livro.capa}` : null;
 
                 if (modoExibicao === 'grade') {
-                    card.className = "bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-3 cursor-pointer hover:shadow-md transition-all";
+                    card.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex gap-4 cursor-pointer active:scale-95 transition-all";
                     card.innerHTML = `
-                        <div class="flex gap-3">
-                            ${imgSrc ? `<img src="${imgSrc}" class="w-12 h-16 object-cover rounded shadow-sm">` : `<div class="w-12 h-16 bg-slate-50 rounded flex items-center justify-center text-[8px] text-slate-300 font-bold border border-slate-100">N/A</div>`}
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-sm text-slate-800 truncate">${livro.titulo}</h4>
-                                <p class="text-[11px] text-slate-500 truncate">${livro.autor}</p>
-                                <span class="inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${livro.quantidade > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}">Qtd: ${livro.quantidade}</span>
-                            </div>
+                        ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-20 object-cover rounded-lg shadow-sm">` : `<div class="w-16 h-20 bg-slate-50 rounded-lg flex items-center justify-center border border-dashed"><i class="fa-solid fa-image text-slate-200"></i></div>`}
+                        <div class="min-w-0 flex-1">
+                            <h4 class="font-bold text-slate-800 truncate">${livro.titulo}</h4>
+                            <p class="text-xs text-slate-400 mb-2 truncate">${livro.autor}</p>
+                            <span class="px-2 py-1 rounded-md text-[10px] font-black uppercase ${livro.quantidade > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}">Estoque: ${livro.quantidade}</span>
                         </div>
                     `;
                 } else {
-                    card.className = "bg-white p-3 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4 cursor-pointer hover:bg-slate-50";
+                    card.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between cursor-pointer active:bg-slate-50 transition-all";
                     card.innerHTML = `
-                        <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 shrink-0"><i class="fa-solid fa-book text-xs"></i></div>
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-bold text-sm text-slate-800 truncate">${livro.titulo}</h4>
-                            <p class="text-[10px] text-slate-400 truncate">${livro.autor} • ${livro.genero || 'Geral'}</p>
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-slate-800 truncate">${livro.titulo}</h4>
+                            <p class="text-[10px] text-slate-400 truncate uppercase tracking-widest">${livro.autor}</p>
                         </div>
-                        <span class="text-xs font-bold text-slate-600">${livro.quantidade}</span>
+                        <div class="text-right">
+                            <span class="text-xs font-black text-slate-600">${livro.quantidade} un.</span>
+                        </div>
                     `;
                 }
                 container.appendChild(card);
             });
         }
 
-        // FUNÇÕES AUXILIARES (MODAIS E CRUD)
-        function abrirScanner() {
-            document.getElementById('modalScanner').classList.add('active');
-            leitorCodigoBarras = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 150} }, false);
-            leitorCodigoBarras.render((texto) => { document.getElementById('codigo').value = texto; fecharScanner(); }, () => {});
-        }
-        function fecharScanner() { if (leitorCodigoBarras) leitorCodigoBarras.clear(); document.getElementById('modalScanner').classList.remove('active'); }
-        
         async function salvarLivro(e) {
             e.preventDefault();
+            const btn = document.getElementById('btnSalvar');
+            btn.disabled = true; btn.innerHTML = "Salvando...";
+            
             const id = document.getElementById('livroId').value;
             const dados = { 
                 codigo_barra: document.getElementById('codigo').value, 
@@ -249,8 +245,17 @@
                 genero: document.getElementById('genero').value,
                 capa: document.getElementById('capaBase64').value 
             };
+
             const { error } = id ? await db.from('livros').update(dados).eq('id', id) : await db.from('livros').insert([dados]);
-            if (error) alert("Erro ao salvar"); else { limparFormulario(); carregarLivros(); }
+            
+            btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check"></i> Finalizar Cadastro';
+            
+            if (error) alert("Erro ao salvar: " + error.message); 
+            else { 
+                limparFormulario(); 
+                carregarLivros(); 
+                fecharCadastroNoMobile();
+            }
         }
 
         function abrirDetalhes(livro) {
@@ -258,24 +263,12 @@
             document.getElementById('detTitulo').innerText = livro.titulo;
             document.getElementById('detAutor').innerText = livro.autor;
             document.getElementById('detQtd').innerText = livro.quantidade;
-            document.getElementById('detGenero').innerText = livro.genero || '-';
-            document.getElementById('detCodigo').innerText = livro.codigo_barra;
+            document.getElementById('detGenero').innerText = livro.genero || 'Não definido';
             const img = document.getElementById('detCapa');
             const txt = document.getElementById('detCapaTexto');
             if (livro.capa) { img.src = `data:image/png;base64,${livro.capa}`; img.classList.remove('hidden'); txt.classList.add('hidden'); }
             else { img.classList.add('hidden'); txt.classList.remove('hidden'); }
             document.getElementById('modalDetalhes').classList.add('active');
-        }
-
-        function fecharModal(id) { document.getElementById(id).classList.remove('active'); }
-        function limparFormulario() { document.getElementById('formLivro').reset(); document.getElementById('livroId').value = ""; document.getElementById('capaBase64').value = ""; }
-
-        async function excluirLivroAtual() {
-            if (confirm("Excluir este livro?")) {
-                await db.from('livros').delete().eq('id', dadosLivroAtual.id);
-                fecharModal('modalDetalhes');
-                carregarLivros();
-            }
         }
 
         function prepararEdicao() {
@@ -288,43 +281,36 @@
             document.getElementById('genero').value = l.genero || '';
             document.getElementById('capaBase64').value = l.capa || '';
             fecharModal('modalDetalhes');
+            toggleCadastro(); // Abre a gaveta para editar
         }
 
-        // CÂMERA E CAPA
-        async function abrirCameraCapa() {
-            fecharModal('modalDetalhes');
-            document.getElementById('modalCameraCapa').classList.add('active');
-            streamCamera = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-            document.getElementById('videoCamera').srcObject = streamCamera;
-        }
-        function fecharCameraCapa() {
-            if (streamCamera) streamCamera.getTracks().forEach(t => t.stop());
-            fecharModal('modalCameraCapa');
-            document.getElementById('modalDetalhes').classList.add('active');
-        }
-        async function capturarFoto() {
-            const v = document.getElementById('videoCamera'), c = document.getElementById('canvasCamera');
-            c.width = 300; c.height = 400;
-            c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
-            const b64 = c.toDataURL('image/jpeg', 0.7).split(',')[1];
-            await db.from('livros').update({ capa: b64 }).eq('id', dadosLivroAtual.id);
-            dadosLivroAtual.capa = b64;
-            abrirDetalhes(dadosLivroAtual);
-            fecharCameraCapa();
-            carregarLivros();
-        }
-        async function alterarCapaArquivo(e) {
-            const f = e.target.files[0];
-            const r = new FileReader();
-            r.onload = async (ev) => {
-                const b64 = ev.target.result.split(',')[1];
-                await db.from('livros').update({ capa: b64 }).eq('id', dadosLivroAtual.id);
-                dadosLivroAtual.capa = b64;
-                abrirDetalhes(dadosLivroAtual);
+        async function excluirLivroAtual() {
+            if (confirm("Deseja realmente excluir este livro?")) {
+                await db.from('livros').delete().eq('id', dadosLivroAtual.id);
+                fecharModal('modalDetalhes');
                 carregarLivros();
-            };
-            r.readAsDataURL(f);
+            }
         }
+
+        function limparFormulario() {
+            document.getElementById('formLivro').reset();
+            document.getElementById('livroId').value = "";
+            document.getElementById('capaBase64').value = "";
+        }
+
+        function abrirScanner() {
+            document.getElementById('modalScanner').classList.add('active');
+            leitorCodigoBarras = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }, false);
+            leitorCodigoBarras.render((texto) => { 
+                document.getElementById('codigo').value = texto; 
+                fecharScanner(); 
+            });
+        }
+        function fecharScanner() { if(leitorCodigoBarras) leitorCodigoBarras.clear(); fecharModal('modalScanner'); }
+        function fecharModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        document.getElementById('pesquisa').addEventListener('input', (e) => carregarLivros(e.target.value));
+        document.addEventListener('DOMContentLoaded', () => mudarVisualizacao(modoExibicao));
     </script>
 </body>
 </html>
