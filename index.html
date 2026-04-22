@@ -296,7 +296,7 @@
             const btn = document.getElementById('btnSalvar'); const textoOriginal = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'; btn.disabled = true;
             const id = document.getElementById('livroId').value;
-            const dados = { codigo_barra: document.getElementById('codigo').value, titulo: document.getElementById('titulo').value, autor: document.getElementById('autor').value, editora: document.getElementById('editora').value, ano: document.getElementById('ano').value || null, quantidade: parseInt(document.getElementById('quantidade').value), isbn: document.getElementById('isbn').value, genero: document.getElementById('genero').value, capa: document.getElementById('capaBase64').value };
+            const dados = { codigo_barra: document.getElementById('codigo').value, titulo: document.getElementById('titulo').value, autor: document.getElementById('autor').value, editora: document.getElementById('editora').value, ano: document.getElementById('ano').value || null, quantidade: parseInt(document.getElementById('quantidade').value), isbn: document.getElementById('isbn').value, genero: document.getElementById('genero').value, capa: document.getElementById('capaBase64').value, local: document.getElementById('local').value };
             let error = id ? (await db.from('livros').update(dados).eq('id', id)).error : (await db.from('livros').insert([dados])).error;
             btn.innerHTML = textoOriginal; btn.disabled = false;
             if (error) alert("Erro: " + error.message); else { limparFormulario(); carregarLivros(document.getElementById('pesquisa').value); }
