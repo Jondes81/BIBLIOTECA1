@@ -63,10 +63,8 @@
                 <div><label class="font-bold text-xs text-slate-600 uppercase tracking-wider mb-1 block">Editora</label><input type="text" id="editora" class="input-padrao"></div>
                 <div><label class="font-bold text-xs text-slate-600 uppercase tracking-wider mb-1 block">Gênero</label><input type="text" id="genero" class="input-padrao" placeholder="Ex: Ficção, Didático..."></div>
                 <div><label class="font-bold text-xs text-slate-600 uppercase tracking-wider mb-1 block">ISBN</label><input type="text" id="isbn" class="input-padrao"></div>
-                <div><label class="font-bold text-xs text-slate-600 uppercase tracking-wider mb-1 block">Localização</label><input type="text" id="local" class="input-padrao"></div>
+                <div><label class="font-bold text-xs text-slate-600 uppercase tracking-wider mb-1 block">Localização</label><input type="text" id="local" class="input-padrao" placeholder="Ex: Estante A1"></div>
             </div>
-
-        
 
             <div class="flex flex-col gap-2 mt-4">
                 <button type="submit" id="btnSalvar" class="bg-emerald-600 text-white font-bold py-3 rounded-lg shadow hover:bg-emerald-700 hover:shadow-md transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Salvar Livro</button>
@@ -95,8 +93,7 @@
             </div>
         </div>
 
-        <div id="containerLivros" class="flex-1 p-6 overflow-y-auto">
-            </div>
+        <div id="containerLivros" class="flex-1 p-6 overflow-y-auto"></div>
     </main>
 
     <div id="modalScanner" class="modal fixed inset-0 items-center justify-center z-[60]">
@@ -122,25 +119,12 @@
                         <img id="detCapa" src="" alt="Capa" class="object-cover w-full h-full hidden">
                         <div id="detCapaTexto" class="text-slate-400 font-semibold text-xs text-center p-2 flex flex-col items-center gap-2"><i class="fa-solid fa-image text-2xl"></i> SEM CAPA</div>
                     </div>
-                    <div class="flex w-full gap-1">
-                        <label class="flex-1 bg-slate-100 text-slate-700 py-1.5 rounded text-xs font-bold text-center cursor-pointer hover:bg-slate-200 transition" title="Enviar Arquivo">
-                            <i class="fa-solid fa-upload"></i> Arquivo
-                            <input type="file" accept="image/*" class="hidden" onchange="alterarCapaArquivo(event)">
-                        </label>
-                        <button onclick="abrirCameraCapa()" class="flex-1 bg-blue-50 text-blue-600 py-1.5 rounded text-xs font-bold hover:bg-blue-100 transition" title="Tirar Foto">
-                            <i class="fa-solid fa-camera"></i> Foto
-                        </button>
-                    </div>
                 </div>
                 <div class="flex-1 space-y-4">
                     <div><h4 id="detTitulo" class="text-xl font-bold text-slate-900 leading-tight"></h4><p id="detAutor" class="text-blue-600 font-medium text-sm"></p></div>
                     <div class="grid grid-cols-2 gap-3 text-sm">
-                        <div class="bg-slate-50 p-2 rounded border border-slate-100"><span class="text-xs text-slate-500 block uppercase">Gênero</span><span id="detGenero" class="font-semibold text-slate-800"></span></div>
+                        <div class="bg-slate-50 p-2 rounded border border-slate-100"><span class="text-xs text-slate-500 block uppercase">Localização</span><span id="detLocal" class="font-semibold text-slate-800"></span></div>
                         <div class="bg-slate-50 p-2 rounded border border-slate-100"><span class="text-xs text-slate-500 block uppercase">Estoque</span><span id="detQtd" class="font-bold text-lg"></span></div>
-                        <div class="bg-slate-50 p-2 rounded border border-slate-100 col-span-2 flex justify-between items-center">
-                            <div><span class="text-xs text-slate-500 block uppercase">Código de Barras</span><span id="detCodigo" class="font-mono text-slate-800"></span></div>
-                            <i class="fa-solid fa-barcode text-2xl text-slate-300"></i>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -151,220 +135,107 @@
         </div>
     </div>
 
-    <div id="modalCameraCapa" class="modal fixed inset-0 items-center justify-center z-[60]">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 flex flex-col items-center">
-            <h3 class="text-xl font-bold mb-4 text-slate-800">📸 Enquadre a Capa</h3>
-            <div class="rounded-lg overflow-hidden border-4 border-slate-200 mb-4 shadow-inner relative">
-                <video id="videoCamera" class="w-64 h-80 bg-black object-cover" autoplay playsinline></video>
-                <div class="absolute inset-0 border-2 border-white/50 m-4 rounded pointer-events-none"></div>
-            </div>
-            <canvas id="canvasCamera" class="hidden"></canvas>
-            <div class="flex gap-3 w-full">
-                <button onclick="capturarFoto()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 shadow-sm transition-colors">Capturar</button>
-                <button onclick="fecharCameraCapa()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-lg hover:bg-slate-300 transition-colors">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // 🛑🛑🛑 CONFIGURE O SUPABASE AQUI 🛑🛑🛑
-        const SUPABASE_URL = 'https://rotpcchkqqaxrgewrpoy.supabase.co'; // Ex: https://xyz.supabase.co
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdHBjY2hrcXFheHJnZXdycG95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDk5MzQsImV4cCI6MjA5MDk4NTkzNH0.Z5n-47ZPWCHD0G4WZAW8YNUh0fIVRD5JuBhsmxkXdJ8'; // O token longo anon/public
+        const SUPABASE_URL = 'https://rotpcchkqqaxrgewrpoy.supabase.co'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdHBjY2hrcXFheHJnZXdycG95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDk5MzQsImV4cCI6MjA5MDk4NTkzNH0.Z5n-47ZPWCHD0G4WZAW8YNUh0fIVRD5JuBhsmxkXdJ8'; 
         
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let dadosLivroAtual = null;
-        let streamCamera = null;
-        let leitorCodigoBarras = null;
-        
-        // RECUPERA A PREFERÊNCIA DO USUÁRIO OU DEFINE GRADE COMO PADRÃO
         let modoExibicao = localStorage.getItem('modoExibicaoLivros') || 'grade'; 
 
         document.addEventListener('DOMContentLoaded', () => {
-            mudarVisualizacao(modoExibicao); // Aplica a visualização escolhida
+            mudarVisualizacao(modoExibicao);
             document.getElementById('pesquisa').addEventListener('input', (e) => carregarLivros(e.target.value));
             document.getElementById('formLivro').addEventListener('submit', salvarLivro);
         });
 
-        // --- SISTEMA DE VISUALIZAÇÃO (GRADE VS LISTA) ---
         function mudarVisualizacao(modo) {
             modoExibicao = modo;
             localStorage.setItem('modoExibicaoLivros', modo);
-
-            const btnGrade = document.getElementById('btnGrade');
-            const btnLista = document.getElementById('btnLista');
-
-            if (modo === 'grade') {
-                btnGrade.className = "w-10 h-10 rounded-lg flex items-center justify-center transition-colors bg-blue-100 text-blue-600 shadow-sm";
-                btnLista.className = "w-10 h-10 rounded-lg flex items-center justify-center transition-colors text-slate-400 hover:bg-slate-100";
-            } else {
-                btnLista.className = "w-10 h-10 rounded-lg flex items-center justify-center transition-colors bg-blue-100 text-blue-600 shadow-sm";
-                btnGrade.className = "w-10 h-10 rounded-lg flex items-center justify-center transition-colors text-slate-400 hover:bg-slate-100";
-            }
-
             carregarLivros(document.getElementById('pesquisa').value);
         }
 
-        // --- CRUD BANCO DE DADOS ---
         async function carregarLivros(termo = "") {
-            let query = db.from('livros').select('id, titulo, autor, quantidade, codigo_barra, capa, genero');
+            let query = db.from('livros').select('*');
             if (termo) query = query.or(`titulo.ilike.%${termo}%,autor.ilike.%${termo}%,genero.ilike.%${termo}%,codigo_barra.ilike.%${termo}%`);
 
             const { data: livros, error } = await query;
-            if (error) return alert("Erro ao carregar livros!");
+            if (error) return;
 
             const container = document.getElementById('containerLivros');
             container.innerHTML = ''; 
 
             if(livros.length === 0) {
-                container.className = "flex-1 p-6 overflow-y-auto flex items-center justify-center";
-                container.innerHTML = `<div class="flex flex-col items-center justify-center text-slate-400"><i class="fa-solid fa-book-open-reader text-6xl mb-4 opacity-50"></i><p>Nenhum livro encontrado.</p></div>`;
+                container.innerHTML = `<p class="text-center text-slate-400">Nenhum livro encontrado.</p>`;
                 return;
             }
 
-            // CORREÇÃO: Mantém as classes "flex-1 p-6 overflow-y-auto" em ambos os modos para garantir o Scroll!
-            if (modoExibicao === 'grade') {
-                container.className = "flex-1 p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5 content-start";
-            } else {
-                container.className = "flex-1 p-6 overflow-y-auto flex flex-col gap-3 content-start";
-            }
-
             livros.forEach(livro => {
-                const emEstoque = livro.quantidade > 0;
-                const corBadge = emEstoque ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-red-100 text-red-700 border-red-200';
-                const iconeBadge = emEstoque ? 'fa-check' : 'fa-xmark';
-                const imgSrc = livro.capa ? `data:image/png;base64,${livro.capa}` : '';
-
                 const card = document.createElement('div');
                 card.onclick = () => abrirDetalhes(livro);
-
-                if (modoExibicao === 'grade') {
-                    const imgTag = livro.capa 
-                        ? `<img src="${imgSrc}" class="w-16 h-24 object-cover rounded shadow-sm border border-slate-200 shrink-0">` 
-                        : `<div class="w-16 h-24 bg-slate-100 border border-slate-200 rounded shadow-sm flex flex-col items-center justify-center text-[10px] text-slate-400 font-bold shrink-0"><i class="fa-solid fa-image text-lg mb-1"></i>SEM FOTO</div>`;
-                    
-                    card.className = "bg-white p-4 rounded-xl shadow-sm hover:shadow-md cursor-pointer border border-slate-200 flex items-start gap-4 transition-all group";
-                    card.innerHTML = `
-                        ${imgTag}
-                        <div class="flex-1 min-w-0 flex flex-col justify-between h-full">
-                            <div>
-                                <h4 class="font-bold text-slate-800 text-base leading-tight truncate group-hover:text-blue-600 transition-colors">${livro.titulo}</h4>
-                                <p class="text-sm text-slate-500 truncate mt-1"><i class="fa-solid fa-pen-nib w-4 text-slate-300"></i> ${livro.autor}</p>
-                                <p class="text-xs text-slate-400 truncate mt-0.5"><i class="fa-solid fa-tag w-4 text-slate-300"></i> ${livro.genero || 'Sem gênero'}</p>
-                            </div>
-                            <div class="mt-3 flex items-center justify-between border-t border-slate-50 pt-3">
-                                <span class="text-xs font-mono text-slate-400 bg-slate-100 px-2 py-1 rounded">${livro.codigo_barra}</span>
-                                <span class="text-xs font-bold px-2.5 py-1 rounded-full border ${corBadge} flex items-center gap-1 shadow-sm"><i class="fa-solid ${iconeBadge}"></i> Qtd: ${livro.quantidade}</span>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    const imgTag = livro.capa 
-                        ? `<img src="${imgSrc}" class="w-10 h-10 object-cover rounded-full shadow-sm border border-slate-200 shrink-0">` 
-                        : `<div class="w-10 h-10 bg-slate-100 border border-slate-200 rounded-full shadow-sm flex items-center justify-center text-[10px] text-slate-400 shrink-0"><i class="fa-solid fa-image"></i></div>`;
-                    
-                    card.className = "bg-white p-3 rounded-lg shadow-sm hover:shadow-md cursor-pointer border border-slate-200 flex items-center gap-4 transition-all group";
-                    card.innerHTML = `
-                        ${imgTag}
-                        <div class="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 items-center min-w-0">
-                            <div class="col-span-1 sm:col-span-5 min-w-0">
-                                <h4 class="font-bold text-slate-800 text-sm truncate group-hover:text-blue-600 transition-colors">${livro.titulo}</h4>
-                                <p class="text-xs text-slate-500 truncate">${livro.autor}</p>
-                            </div>
-                            <div class="col-span-1 sm:col-span-3 text-xs text-slate-500 truncate hidden sm:block"><i class="fa-solid fa-tag w-4 text-slate-300"></i> ${livro.genero || 'N/A'}</div>
-                            <div class="col-span-1 sm:col-span-2 text-xs font-mono text-slate-400 truncate hidden sm:block"><i class="fa-solid fa-barcode w-4 text-slate-300"></i> ${livro.codigo_barra}</div>
-                            <div class="col-span-1 sm:col-span-2 flex justify-end">
-                                <span class="text-xs font-bold px-2 py-1 rounded-full border ${corBadge} flex items-center gap-1"><i class="fa-solid ${iconeBadge}"></i> Qtd: ${livro.quantidade}</span>
-                            </div>
-                        </div>
-                    `;
-                }
+                card.className = "bg-white p-4 rounded-xl shadow-sm hover:shadow-md cursor-pointer border border-slate-200 flex gap-4 mb-4";
+                card.innerHTML = `<div><h4 class="font-bold">${livro.titulo}</h4><p class="text-sm">${livro.autor}</p></div>`;
                 container.appendChild(card);
             });
         }
 
-        // ================= (RESTANTE DO CÓDIGO) =================
-        function abrirScanner() {
-            document.getElementById('modalScanner').classList.add('active');
-            leitorCodigoBarras = new Html5QrcodeScanner("reader", { fps: 15, qrbox: {width: 300, height: 100}, videoConstraints: { facingMode: "environment", advanced: [{ focusMode: "continuous" }] } }, false);
-            leitorCodigoBarras.render((texto) => { document.getElementById('codigo').value = texto; fecharScanner(); new Audio('https://www.soundjay.com/buttons/sounds/beep-07a.mp3').play().catch(()=>{}); }, () => {});
-        }
-        function fecharScanner() { if (leitorCodigoBarras) { leitorCodigoBarras.clear(); leitorCodigoBarras = null; } document.getElementById('modalScanner').classList.remove('active'); }
-
         async function salvarLivro(e) {
             e.preventDefault();
-            const btn = document.getElementById('btnSalvar'); const textoOriginal = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'; btn.disabled = true;
+            const btn = document.getElementById('btnSalvar');
+            btn.disabled = true;
+            
             const id = document.getElementById('livroId').value;
-            const dados = { codigo_barra: document.getElementById('codigo').value, titulo: document.getElementById('titulo').value, autor: document.getElementById('autor').value, editora: document.getElementById('editora').value, ano: document.getElementById('ano').value || null, quantidade: parseInt(document.getElementById('quantidade').value), isbn: document.getElementById('isbn').value, genero: document.getElementById('genero').value, capa: document.getElementById('capaBase64').value, local: document.getElementById('local').value };
-            let error = id ? (await db.from('livros').update(dados).eq('id', id)).error : (await db.from('livros').insert([dados])).error;
-            btn.innerHTML = textoOriginal; btn.disabled = false;
-            if (error) alert("Erro: " + error.message); else { limparFormulario(); carregarLivros(document.getElementById('pesquisa').value); }
+            const dados = { 
+                codigo_barra: document.getElementById('codigo').value, 
+                titulo: document.getElementById('titulo').value, 
+                autor: document.getElementById('autor').value, 
+                editora: document.getElementById('editora').value, 
+                ano: document.getElementById('ano').value || null, 
+                quantidade: parseInt(document.getElementById('quantidade').value), 
+                isbn: document.getElementById('isbn').value, 
+                genero: document.getElementById('genero').value, 
+                capa: document.getElementById('capaBase64').value, 
+                local: document.getElementById('local').value // Conectado ao banco
+            };
+
+            let { error } = id ? await db.from('livros').update(dados).eq('id', id) : await db.from('livros').insert([dados]);
+            
+            btn.disabled = false;
+            if (error) alert("Erro: " + error.message); 
+            else { limparFormulario(); carregarLivros(); }
         }
 
         function abrirDetalhes(livro) {
             dadosLivroAtual = livro; 
-            document.getElementById('detTitulo').innerText = livro.titulo; document.getElementById('detAutor').innerText = livro.autor; document.getElementById('detGenero').innerText = livro.genero || '-'; document.getElementById('detQtd').innerText = livro.quantidade; document.getElementById('detCodigo').innerText = livro.codigo_barra;
-            document.getElementById('detQtd').className = livro.quantidade > 0 ? "font-bold text-2xl text-emerald-600" : "font-bold text-2xl text-red-600";
-            atualizarCapaVisual(livro.capa); document.getElementById('modalDetalhes').classList.add('active');
+            document.getElementById('detTitulo').innerText = livro.titulo;
+            document.getElementById('detAutor').innerText = livro.autor;
+            document.getElementById('detLocal').innerText = livro.local || 'Não informado';
+            document.getElementById('detQtd').innerText = livro.quantidade;
+            document.getElementById('modalDetalhes').classList.add('active');
         }
 
-        function atualizarCapaVisual(base64) {
-            const imgEl = document.getElementById('detCapa'); const txtEl = document.getElementById('detCapaTexto');
-            if (base64) { imgEl.src = `data:image/png;base64,${base64}`; imgEl.classList.remove('hidden'); txtEl.classList.add('hidden'); } 
-            else { imgEl.src = ""; imgEl.classList.add('hidden'); txtEl.classList.remove('hidden'); }
-        }
-
-        async function excluirLivroAtual() {
-            if (!confirm(`Excluir a obra '${dadosLivroAtual.titulo}'?`)) return;
-            const { error } = await db.from('livros').delete().eq('id', dadosLivroAtual.id);
-            if (error) alert("Erro ao excluir!"); else { fecharModal('modalDetalhes'); carregarLivros(document.getElementById('pesquisa').value); }
-        }
-
-        // ======== CORREÇÃO PRINCIPAL AQUI: Função prepararEdicao ========
         async function prepararEdicao() {
             const { data, error } = await db.from('livros').select('*').eq('id', dadosLivroAtual.id).single();
-            if(error) return alert("Erro ao buscar os dados completos do livro.");
+            if(error) return;
             
             document.getElementById('livroId').value = data.id;
             
-            // Loop melhorado: Em vez de "|| ''", agora usa validação direta, puxando todos os dados.
-            ['codigo_barra', 'titulo', 'autor', 'editora', 'ano', 'quantidade', 'isbn', 'genero', 'capa'].forEach(c => { 
+            ['codigo_barra', 'titulo', 'autor', 'editora', 'ano', 'quantidade', 'isbn', 'genero', 'capa', 'local'].forEach(c => { 
                 const idDoCampo = (c === 'codigo_barra') ? 'codigo' : (c === 'capa') ? 'capaBase64' : c;
                 const campoHtml = document.getElementById(idDoCampo);
-                
-                if (campoHtml) {
-                    campoHtml.value = (data[c] !== null && data[c] !== undefined) ? data[c] : ''; 
-                }
+                if (campoHtml) campoHtml.value = data[c] || ''; 
             });
 
-            // Melhoria UX: Abre o painel "Informações Opcionais" se a obra já tiver ano, editora ou isbn cadastrados
-            if (data.editora || data.isbn || data.genero) {
-                const detalhesAba = document.querySelector('details.group');
-                if (detalhesAba) detalhesAba.open = true;
-            }
-
-            const btn = document.getElementById('btnSalvar'); 
-            btn.innerHTML = '<i class="fa-solid fa-pen"></i> Atualizar Livro'; 
-            btn.className = "bg-amber-500 text-white font-bold py-3 rounded-lg shadow hover:bg-amber-600 transition-all flex items-center justify-center gap-2";
-            
             fecharModal('modalDetalhes');
         }
 
-        function gerarCodigo() { document.getElementById('codigo').value = "LIB" + Math.floor(100000 + Math.random() * 900000); }
-        
         function limparFormulario() { 
-            document.getElementById('formLivro').reset(); document.getElementById('livroId').value = ""; document.getElementById('capaBase64').value = ""; 
-            const btn = document.getElementById('btnSalvar'); btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar Livro'; btn.className = "bg-emerald-600 text-white font-bold py-3 rounded-lg shadow hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"; 
+            document.getElementById('formLivro').reset(); 
+            document.getElementById('livroId').value = ""; 
         }
-        function fecharModal(id) { document.getElementById(id).classList.remove('active'); }
 
-        async function alterarCapaArquivo(e) { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = async (ev) => await salvarNovaCapa(ev.target.result.split(',')[1]); r.readAsDataURL(f); }
-        async function abrirCameraCapa() { document.getElementById('modalDetalhes').classList.remove('active'); document.getElementById('modalCameraCapa').classList.add('active'); try { streamCamera = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); document.getElementById('videoCamera').srcObject = streamCamera; } catch (err) { alert("Erro na câmera."); fecharCameraCapa(); } }
-        async function capturarFoto() { const v = document.getElementById('videoCamera'), c = document.getElementById('canvasCamera'), ctx = c.getContext('2d'); c.width = 300; c.height = 400; const m = Math.min(v.videoWidth, v.videoHeight); ctx.drawImage(v, (v.videoWidth - m)/2, (v.videoHeight - m)/2, m, m, 0, 0, c.width, c.height); await salvarNovaCapa(c.toDataURL('image/jpeg', 0.8).split(',')[1]); fecharCameraCapa(); }
-        function fecharCameraCapa() { if (streamCamera) { streamCamera.getTracks().forEach(t => t.stop()); streamCamera = null; } fecharModal('modalCameraCapa'); document.getElementById('modalDetalhes').classList.add('active'); }
-        async function salvarNovaCapa(b64) { const { error } = await db.from('livros').update({ capa: b64 }).eq('id', dadosLivroAtual.id); if (error) alert("Erro ao salvar foto"); else { dadosLivroAtual.capa = b64; atualizarCapaVisual(b64); carregarLivros(document.getElementById('pesquisa').value); } }
-        
+        function fecharModal(id) { document.getElementById(id).classList.remove('active'); }
     </script>
 </body>
 </html>
