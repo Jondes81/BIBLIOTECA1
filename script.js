@@ -317,23 +317,53 @@ function abrirDetalhes(livro) {
 // ==========================================
 // CÂMERA, SCANNER E HELPERS
 // ==========================================
+// ==========================================
+// CÂMERA E SCANNER (OTIMIZADO PARA iOS)
+// ==========================================
 function abrirScanner() {
     document.getElementById('modalScanner').classList.add('active');
-    html5QrCode = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+    
+    // Configuração específica para forçar compatibilidade em dispositivos móveis
+    html5QrCode = new Html5QrcodeScanner("reader", { 
+        fps: 10, 
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0,
+        // Força a prioridade para a câmera do dispositivo em vez de arquivos
+        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA] 
+    });
+    
     html5QrCode.render((text) => {
         document.getElementById('codigo').value = text;
         if (text.length >= 10) document.getElementById('isbn').value = text;
         fecharModal('modalScanner');
+    }, (error) => {
+        // Silencia os avisos de "QR Code não encontrado no frame atual" para não poluir o console
     });
 }
 
 async function abrirCamera() {
     document.getElementById('modalCamera').classList.add('active');
+    const video = document.getElementById('videoCamera');
+    
+    // Injeção forçada via JavaScript para garantir que o Safari obedeça
+    video.setAttribute('autoplay', '');
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+
     try {
-        streamCamera = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        document.getElementById('videoCamera').srcObject = streamCamera;
+        // Tenta pegar a câmera traseira especificamente
+        streamCamera = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: { ideal: "environment" } },
+            audio: false 
+        });
+        video.srcObject = streamCamera;
     } catch (err) {
-        alert("Câmera indisponível.");
+        console.error("Erro na câmera:", err);
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+            alert("No iPhone, a câmera só funciona se o site tiver HTTPS (cadeado seguro).");
+        } else {
+            alert("Acesso à câmera negado. Vá aos Ajustes do iPhone > Safari e permita a Câmera.");
+        }
         fecharModal('modalCamera');
     }
 }
