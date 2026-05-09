@@ -1,0 +1,36 @@
+/* Scrollbar Estilizada */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+/* Modais */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+}
+.modal.active { display: flex; animation: fadeIn 0.2s ease-out; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Utilitários de Formulário */
+.input-padrao {
+    width: 100%; border: 1px solid #e2e8f0; padding: 0.6rem 0.8rem; border-radius: 0.6rem;
+    outline: none; transition: all 0.2s; background: #f8fafc; font-size: 0.9rem;
+}
+.input-padrao:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); background: white; }
+.label-form { font-weight: 700; font-size: 0.7rem; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; display: block; }
+
+/* Cards */
+.card-livro {
+    background: white; padding: 1rem; border-radius: 1rem; border: 1px solid #e2e8f0;
+    cursor: pointer; transition: all 0.2s; display: flex; gap: 1rem; align-items: start;
+}
+.card-livro:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #3b82f6; }
