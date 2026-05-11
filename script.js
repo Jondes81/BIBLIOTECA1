@@ -323,21 +323,38 @@ function abrirDetalhes(livro) {
 function abrirScanner() {
     document.getElementById('modalScanner').classList.add('active');
     
-    // Configuração específica para forçar compatibilidade em dispositivos móveis
-    html5QrCode = new Html5QrcodeScanner("reader", { 
-        fps: 10, 
-        qrbox: { width: 250, height: 250 },
+    // Configuração avançada para leitura de códigos de barras (ISBN/EAN)
+    const config = { 
+        fps: 20, // Aumentamos os quadros por segundo para capturar melhor o movimento
+        qrbox: { width: 280, height: 150 }, // Box mais retangular, ideal para códigos de barras
         aspectRatio: 1.0,
-        // Força a prioridade para a câmera do dispositivo em vez de arquivos
-        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA] 
-    });
+        // IMPORTANTE: Forçar suporte a códigos de barras comuns
+        formatsToSupport: [ 
+            Html5QrcodeSupportedFormats.EAN_13, 
+            Html5QrcodeSupportedFormats.EAN_8, 
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.QR_CODE 
+        ]
+    };
+
+    html5QrCode = new Html5QrcodeScanner("reader", config, false);
     
     html5QrCode.render((text) => {
+        // Quando ler com sucesso:
         document.getElementById('codigo').value = text;
-        if (text.length >= 10) document.getElementById('isbn').value = text;
+        
+        // Se o código tiver 13 dígitos, provavelmente é um ISBN, então preenchemos o campo ISBN também
+        if (text.length >= 10) {
+            document.getElementById('isbn').value = text;
+        }
+        
+        // Feedback vibratório (se o celular suportar)
+        if (navigator.vibrate) navigator.vibrate(100);
+        
         fecharModal('modalScanner');
     }, (error) => {
-        // Silencia os avisos de "QR Code não encontrado no frame atual" para não poluir o console
+        // Erros de "não encontrado no frame" são ignorados para não travar
     });
 }
 
